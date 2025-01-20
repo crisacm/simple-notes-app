@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "797696838325",
+    "project_id": "just-a-notes-app",
+    "storage_bucket": "just-a-notes-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:797696838325:android:f8f94150256d7c3bb5ccfc",
+        "android_client_info": {
+          "package_name": "com.github.crisacm.justnotes"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAg5LtKwHvPRuu0lxltBL_BQ2Afviitrfw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

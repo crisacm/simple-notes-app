@@ -1,4 +1,4 @@
-rootProject.name = "SimpleNotes"
+rootProject.name = "Just-Notes-KMP"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

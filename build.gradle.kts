@@ -6,4 +6,20 @@ plugins {
     alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
+    // Firebase
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.crashlytics) apply false
+    // Ksp
+    alias(libs.plugins.kspCompose)
+    // Room
+    alias(libs.plugins.room)
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental")
+    }
 }
