@@ -15,6 +15,7 @@ compose-multiplatform = "1.7.0"
 junit = "4.13.2"
 kotlin = "2.0.21"
 kotlinx-coroutines = "1.9.0"
+kotlinxSerializationJson = "1.7.3"
 ksp = "2.0.20-Beta1-1.0.22"
 # Coil
 coil = "3.0.4"
@@ -23,7 +24,7 @@ ktor = "3.0.1"
 # Koin
 koin = "3.6.0-Beta4"
 koin-compose = "1.2.0-Beta4"
-# Navigation
+# Navigationø
 navigation-compose = "2.8.0-alpha10"
 # Room
 roomCommon = "2.7.0-alpha11"
@@ -57,6 +58,7 @@ coil-compose-core = { group = "io.coil-kt.coil3", name = "coil-compose-core", ve
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network", version = "coil" }
 coil-network-ktor = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil" }
 # ktor
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
@@ -97,3 +99,8 @@ google-services = { id = "com.google.gms.google-services", version.ref = "gradle
 kspCompose = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 # Room
 room = { id = "androidx.room", version.ref = "roomCommon" }
+# Serialization
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+# Ktlint
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version = "12.1.2" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version = "1.23.7" }

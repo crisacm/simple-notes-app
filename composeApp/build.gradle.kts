@@ -13,6 +13,11 @@ plugins {
   alias(libs.plugins.kspCompose)
   // Room
   alias(libs.plugins.room)
+  // Serialization
+  alias(libs.plugins.serialization)
+  // Ktlint & Detekt
+  alias(libs.plugins.ktlint)
+  alias(libs.plugins.detekt)
 }
 
 kotlin {
@@ -26,7 +31,7 @@ kotlin {
   listOf(
     iosX64(),
     iosArm64(),
-    iosSimulatorArm64()
+    iosSimulatorArm64(),
   ).forEach { iosTarget ->
     iosTarget.binaries.framework {
       baseName = "ComposeApp"
@@ -82,6 +87,9 @@ kotlin {
 
       // Room
       implementation(libs.room.runtime)
+
+      // JSON Serialization
+      implementation(libs.kotlinx.serialization.json)
     }
     iosMain.dependencies {
       // Ktor
@@ -101,12 +109,21 @@ kotlin {
 
 android {
   namespace = "com.github.crisacm"
-  compileSdk = libs.versions.android.compileSdk.get().toInt()
+  compileSdk =
+    libs.versions.android.compileSdk
+      .get()
+      .toInt()
 
   defaultConfig {
     applicationId = "com.github.crisacm.justnotes"
-    minSdk = libs.versions.android.minSdk.get().toInt()
-    targetSdk = libs.versions.android.targetSdk.get().toInt()
+    minSdk =
+      libs.versions.android.minSdk
+        .get()
+        .toInt()
+    targetSdk =
+      libs.versions.android.targetSdk
+        .get()
+        .toInt()
     versionCode = 1
     versionName = "1.0"
   }
