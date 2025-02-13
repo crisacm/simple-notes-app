@@ -13,11 +13,11 @@ data class Note(
 )
 
 data class NoteContent(
-  var id: String,
-  var noteId: String,
-  var content: Any,
+  var id: String = "",
+  var noteId: String = "",
+  var content: Any = Any(),
   var checked: Boolean = false,
-  var type: NoteContentType,
+  var type: NoteContentType = NoteContentType.TEXT,
 )
 
 enum class NoteContentType {

@@ -29,12 +29,14 @@ import coil3.request.crossfade
 import coil3.util.DebugLogger
 import com.github.crisacm.domain.model.Note
 import com.github.crisacm.domain.model.NoteContentType
+import com.github.crisacm.domain.model.fakeNotesList
 import com.github.crisacm.ui.theme.GrayLightIcons
 import com.github.crisacm.ui.theme.NoteYellowDark
 import just_notes_kmp.composeapp.generated.resources.Res
 import just_notes_kmp.composeapp.generated.resources.ic_check_box
 import just_notes_kmp.composeapp.generated.resources.ic_check_box_empty
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Suppress("MagicNumber", "LongMethod")
 @Composable
@@ -137,4 +139,58 @@ fun CardNote(
       }
     }
   }
+}
+
+@Preview
+@Composable
+fun CardNoteWhitePreview() {
+  CardNote(
+    note = fakeNotesList[0],
+    onClick = {},
+  )
+}
+
+@Preview
+@Composable
+fun CardNoteYellowPreview() {
+  CardNote(
+    note = fakeNotesList[1],
+    onClick = {},
+  )
+}
+
+@Preview
+@Composable
+fun CardNoteOrangePreview() {
+  CardNote(
+    note = fakeNotesList[2],
+    onClick = {},
+  )
+}
+
+@Preview
+@Composable
+fun CardNotePurplePreview() {
+  CardNote(
+    note = fakeNotesList[3],
+    onClick = {},
+  )
+}
+
+@Preview
+@Composable
+fun CardNoteGreenPreview() {
+  CardNote(
+    note = fakeNotesList[4],
+    onClick = {},
+  )
+}
+
+@Preview
+@Composable
+fun CardNoteBluePreview() {
+  CardNote(
+    note = fakeNotesList[5],
+    onClick = {},
+  )
 }
