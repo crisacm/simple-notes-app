@@ -13,10 +13,10 @@ androidx-material = "1.12.0"
 androidx-test-junit = "1.2.1"
 compose-multiplatform = "1.7.0"
 junit = "4.13.2"
-kotlin = "2.0.21"
-kotlinx-coroutines = "1.9.0"
+kotlin = "2.1.0"
+kotlinx-coroutines = "1.10.1"
 kotlinxSerializationJson = "1.7.3"
-ksp = "2.0.20-Beta1-1.0.22"
+ksp = "2.1.0-1.0.28"
 # Coil
 coil = "3.0.4"
 # ktor
@@ -27,7 +27,9 @@ koin-compose = "1.2.0-Beta4"
 # Navigationø
 navigation-compose = "2.8.0-alpha10"
 # Room
-roomCommon = "2.7.0-alpha11"
+roomCommon = "2.7.0-rc02"
+# SQLite driver
+sqliteBundled = "2.5.0-rc02"
 # Firebase
 firebase-android-bom = "33.7.0"
 firebase-android-crashlytics = "19.3.0"
@@ -36,6 +38,8 @@ gradlePlugins-crashlytics = "3.0.2"
 gradlePlugins-google-services = "4.4.2"
 # Gitlive
 firebase-gitlive-sdk = "2.1.0"
+# Data Store
+data-store = "1.1.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -74,6 +78,9 @@ navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-co
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomCommon" }
 room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "roomCommon" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCommon" }
+# SQLite Bundled
+sqlite = { module = "androidx.sqlite:sqlite", version.ref = "sqliteBundled" }
+sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqliteBundled" }
 # Firebase
 firebase-android-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-android-bom" }
 firebase-android-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics", version.ref = "firebase-android-crashlytics" }
@@ -84,7 +91,9 @@ gitlive-firebase-kotlin-auth = { module = "dev.gitlive:firebase-auth", version.r
 gitlive-firebase-kotlin-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebase-gitlive-sdk" }
 gitlive-firebase-kotlin-messaging = { module = "dev.gitlive:firebase-messaging", version.ref = "firebase-gitlive-sdk" }
 gitlive-firebase-kotlin-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebase-gitlive-sdk" }
-
+# Data Store
+data-store = { module = "androidx.datastore:datastore", version.ref = "data-store" }
+data-store-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "data-store" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

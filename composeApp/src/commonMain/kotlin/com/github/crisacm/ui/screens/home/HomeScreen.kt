@@ -44,6 +44,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -56,8 +57,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.github.crisacm.domain.model.BottomBarItemData
 import com.github.crisacm.domain.model.Tag
-import com.github.crisacm.domain.model.fakeNotesList
 import com.github.crisacm.domain.model.fakeTagsList
+import com.github.crisacm.ui.base.SIDE_EFFECTS_KEY
 import com.github.crisacm.ui.screens.home.composables.CardNote
 import com.github.crisacm.ui.theme.GrayDarkBackground
 import com.github.crisacm.ui.theme.GrayDarkBottomBarBackground
@@ -72,19 +73,37 @@ import just_notes_kmp.composeapp.generated.resources.ic_mic
 import just_notes_kmp.composeapp.generated.resources.ic_picture
 import just_notes_kmp.composeapp.generated.resources.ic_space_dashboard
 import just_notes_kmp.composeapp.generated.resources.ic_view_day
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onEach
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Suppress("LongMethod")
 @Composable
-fun HomeScreen(navigateToEditNote: (String) -> Unit) {
+fun HomeScreen(
+  state: HomeContracts.State,
+  effect: Flow<HomeContracts.Effect>?,
+  onEventSent: (HomeContracts.Event) -> Unit,
+  navigateTo: (HomeContracts.Effect.Navigation) -> Unit,
+) {
   val tags = fakeTagsList
-  val notes = fakeNotesList
 
   val searchText = remember { mutableStateOf("") }
   val listStyle = remember { mutableStateOf(ListStyle.GRID) }
   val selectedTags = remember { mutableStateOf(0) }
   val openProfileDialog = remember { mutableStateOf(false) }
+
+  LaunchedEffect(SIDE_EFFECTS_KEY) {
+    effect
+      ?.onEach { effect ->
+        when (effect) {
+          is HomeContracts.Effect.Navigation.ToEdit -> {
+            navigateTo(effect)
+          }
+        }
+      }?.collect()
+  }
 
   Scaffold(
     modifier = Modifier.fillMaxSize(),
@@ -138,7 +157,7 @@ fun HomeScreen(navigateToEditNote: (String) -> Unit) {
     floatingActionButton = {
       LargeFloatingActionButton(
         modifier = Modifier.size(64.dp).offset(y = (48).dp),
-        onClick = { navigateToEditNote("") },
+        onClick = { navigateTo(HomeContracts.Effect.Navigation.ToEdit("")) },
         shape = CircleShape,
         containerColor = GrayDarkFabBackground,
         elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(defaultElevation = 6.dp),
@@ -194,11 +213,11 @@ fun HomeScreen(navigateToEditNote: (String) -> Unit) {
           verticalItemSpacing = 10.dp,
           horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-          items(notes.size) { index ->
+          items(state.notes.size) { index ->
             CardNote(
-              modifier = Modifier.padding(bottom = if (index == notes.size - 1) 16.dp else 0.dp),
-              note = notes[index],
-              onClick = {},
+              modifier = Modifier.padding(bottom = if (index == state.notes.size - 1) 16.dp else 0.dp),
+              note = state.notes[index],
+              onClick = { navigateTo(HomeContracts.Effect.Navigation.ToEdit(state.notes[index].id)) },
             )
           }
         }
@@ -461,7 +480,12 @@ fun CardTag(
 @Preview
 @Composable
 fun HomeScreenPreview() {
-  HomeScreen {}
+  HomeScreen(
+    state = HomeContracts.State(),
+    effect = null,
+    onEventSent = {},
+    navigateTo = {},
+  )
 }
 
 @Preview

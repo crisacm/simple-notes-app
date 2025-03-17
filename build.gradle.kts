@@ -25,6 +25,7 @@ allprojects {
     google()
     mavenCentral()
     gradlePluginPortal()
+    maven { url = uri("https://jitpack.io") }
     maven("https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental")
   }
 }

@@ -87,6 +87,13 @@ kotlin {
 
       // Room
       implementation(libs.room.runtime)
+      // SQLiteBundled
+      implementation(libs.sqlite)
+      implementation(libs.sqlite.bundled)
+
+      // Data Store
+      implementation(libs.data.store)
+      implementation(libs.data.store.preferences)
 
       // JSON Serialization
       implementation(libs.kotlinx.serialization.json)
@@ -103,8 +110,6 @@ kotlin {
       implementation(libs.gitlive.firebase.kotlin.crashlytics)
     }
   }
-
-  task("testClasses")
 }
 
 android {
@@ -143,11 +148,19 @@ android {
   }
 }
 
+dependencies {
+  debugImplementation(compose.uiTooling)
+
+  add("kspAndroid", libs.room.compiler)
+  add("kspIosSimulatorArm64", libs.room.compiler)
+  add("kspIosX64", libs.room.compiler)
+  add("kspIosArm64", libs.room.compiler)
+}
+
 room {
   schemaDirectory("$projectDir/schemas")
 }
 
-dependencies {
-  debugImplementation(compose.uiTooling)
-  add("kspCommonMainMetadata", libs.room.compiler)
+ksp {
+  arg("room.schemaLocation", "$projectDir/schemas")
 }
