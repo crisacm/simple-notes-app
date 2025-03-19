@@ -87,3 +87,11 @@ lint/tmp/
 .DS_Store
 .kotlin
 .idea/
+
+# Firebase (Android)
+google-services.json
+**/google-services.json
+
+# Firebase (iOS)
+GoogleService-Info.plist
+**/GoogleService-Info.plist

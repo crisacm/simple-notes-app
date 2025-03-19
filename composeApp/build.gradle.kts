@@ -6,9 +6,6 @@ plugins {
   alias(libs.plugins.androidApplication)
   alias(libs.plugins.composeMultiplatform)
   alias(libs.plugins.composeCompiler)
-  // Firebase
-  alias(libs.plugins.google.services)
-  alias(libs.plugins.crashlytics)
   // Ksp
   alias(libs.plugins.kspCompose)
   // Room
@@ -46,11 +43,6 @@ kotlin {
 
       // Ktor
       implementation(libs.ktor.client.okhttp)
-
-      // Firebase
-      implementation(libs.firebase.android.bom)
-      implementation(libs.firebase.android.crashlytics.ktx)
-      implementation(libs.firebase.android.analytics)
 
       // Koin
       implementation(libs.koin.android)
@@ -101,13 +93,6 @@ kotlin {
     iosMain.dependencies {
       // Ktor
       implementation(libs.ktor.client.darwin)
-
-      // Firebase
-      implementation(libs.gitlive.firebase.kotlin.analytics)
-      implementation(libs.gitlive.firebase.kotlin.auth)
-      implementation(libs.gitlive.firebase.kotlin.firestore)
-      implementation(libs.gitlive.firebase.kotlin.messaging)
-      implementation(libs.gitlive.firebase.kotlin.crashlytics)
     }
   }
 }

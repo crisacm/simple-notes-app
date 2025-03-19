@@ -7,6 +7,18 @@ class HomeViewModel : BaseViewModel<HomeContracts.Event, HomeContracts.State, Ho
   override fun setInitialState(): HomeContracts.State = HomeContracts.State(notes = fakeNotesList)
 
   override fun handleEvent(event: HomeContracts.Event) {
-    //
+    when (event) {
+      HomeContracts.Event.GoToGithub -> {
+        setEffect { HomeContracts.Effect.Navigation.ToGitHub }
+      }
+
+      is HomeContracts.Event.Search -> {
+        TODO()
+      }
+
+      is HomeContracts.Event.Edit -> {
+        setEffect { HomeContracts.Effect.Navigation.ToEdit(event.id) }
+      }
+    }
   }
 }

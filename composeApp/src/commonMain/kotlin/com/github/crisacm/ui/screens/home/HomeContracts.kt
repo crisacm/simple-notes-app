@@ -7,12 +7,14 @@ import com.github.crisacm.ui.base.ViewState
 
 class HomeContracts {
   sealed interface Event : ViewEvent {
+    data object GoToGithub : Event
+
     data class Search(
       val query: String,
     ) : Event
 
-    data class Select(
-      val id: Long,
+    data class Edit(
+      val id: String,
     ) : Event
   }
 
@@ -25,6 +27,8 @@ class HomeContracts {
 
   sealed interface Effect : ViewSideEffect {
     sealed interface Navigation : Effect {
+      data object ToGitHub : Navigation
+
       data class ToEdit(
         val id: String,
       ) : Navigation
