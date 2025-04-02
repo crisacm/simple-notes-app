@@ -1,14 +1,11 @@
-package com.github.crisacm.domain.model
+package com.github.crisacm.ui.screens.edit.composables
 
 import just_notes_kmp.composeapp.generated.resources.Res
-import just_notes_kmp.composeapp.generated.resources.ic_check_box
 import just_notes_kmp.composeapp.generated.resources.ic_format_align_center
 import just_notes_kmp.composeapp.generated.resources.ic_format_align_left
 import just_notes_kmp.composeapp.generated.resources.ic_format_align_right
 import just_notes_kmp.composeapp.generated.resources.ic_format_ink_highlighter
 import just_notes_kmp.composeapp.generated.resources.ic_format_underlined
-import just_notes_kmp.composeapp.generated.resources.ic_imagesmode
-import just_notes_kmp.composeapp.generated.resources.ic_mic_google
 import just_notes_kmp.composeapp.generated.resources.ic_palette
 import just_notes_kmp.composeapp.generated.resources.ic_text_fields
 import org.jetbrains.compose.resources.DrawableResource
@@ -20,10 +17,11 @@ data class EditorOption(
 )
 
 enum class EditorOptionType {
+  ADD_TEXT,
+  ADD_IMAGE,
+  ADD_CHECKLIST,
+  ADD_AUDIO,
   FONT_FAMILY,
-  MICROPHONE,
-  IMAGE,
-  CHECKBOX,
   UNDERLINE,
   HIGH_LIGHT,
   COLOR,
@@ -38,21 +36,6 @@ val defaultEditorOptions =
       desc = "Font Family",
       icon = Res.drawable.ic_text_fields,
       type = EditorOptionType.FONT_FAMILY,
-    ),
-    EditorOption(
-      desc = "Microphone",
-      icon = Res.drawable.ic_mic_google,
-      type = EditorOptionType.MICROPHONE,
-    ),
-    EditorOption(
-      desc = "Image",
-      icon = Res.drawable.ic_imagesmode,
-      type = EditorOptionType.IMAGE,
-    ),
-    EditorOption(
-      desc = "Checkbox",
-      icon = Res.drawable.ic_check_box,
-      type = EditorOptionType.CHECKBOX,
     ),
     EditorOption(
       desc = "Underline",

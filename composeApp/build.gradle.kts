@@ -50,6 +50,9 @@ kotlin {
 
       // Room
       implementation(libs.room.runtime.android)
+
+      // Accompanist
+      implementation("com.google.accompanist:accompanist-permissions:0.32.0")
     }
     commonMain.dependencies {
       implementation(compose.runtime)
@@ -89,6 +92,9 @@ kotlin {
 
       // JSON Serialization
       implementation(libs.kotlinx.serialization.json)
+
+      // Kotlinx DateTime
+      implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
     }
     iosMain.dependencies {
       // Ktor

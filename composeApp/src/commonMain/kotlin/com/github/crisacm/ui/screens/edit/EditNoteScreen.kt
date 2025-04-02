@@ -1,358 +1,428 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.github.crisacm.ui.screens.edit
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.github.crisacm.domain.model.EditorOption
-import com.github.crisacm.domain.model.Note
+import androidx.compose.ui.unit.sp
 import com.github.crisacm.domain.model.NoteContent
-import com.github.crisacm.domain.model.defaultEditorOptions
+import com.github.crisacm.domain.utils.NoteColors
+import com.github.crisacm.domain.utils.NoteContentType
+import com.github.crisacm.ui.base.SIDE_EFFECTS_KEY
+import com.github.crisacm.ui.composable.DeleteNoteDialog
+import com.github.crisacm.ui.screens.edit.composables.BottomEditorOptionsBar
+import com.github.crisacm.ui.screens.edit.composables.EditorOption
+import com.github.crisacm.ui.screens.edit.composables.EditorOptionType
+import com.github.crisacm.ui.screens.edit.composables.InfoModalSheet
+import com.github.crisacm.ui.screens.edit.composables.NoteBody
 import com.github.crisacm.ui.screens.edit.composables.NoteTitle
+import com.github.crisacm.ui.screens.edit.composables.SelectColorsModalSheet
+import com.github.crisacm.ui.screens.edit.composables.SelectTag
+import com.github.crisacm.ui.screens.edit.composables.SelectTagModalSheet
+import com.github.crisacm.ui.screens.edit.composables.TopEditorBar
 import com.github.crisacm.ui.theme.GrayDarkBackground
-import com.github.crisacm.ui.theme.GrayDarkBottomBarBackground
+import com.github.crisacm.ui.theme.GrayDarkerBackground
 import com.github.crisacm.ui.theme.GrayLightIcons
+import com.github.crisacm.ui.theme.NoteBlue
+import com.github.crisacm.ui.theme.NoteGreen
+import com.github.crisacm.ui.theme.NoteOrange
+import com.github.crisacm.ui.theme.NotePurple
+import com.github.crisacm.ui.theme.NoteWhite
+import com.github.crisacm.ui.theme.NoteYellow
+import com.github.crisacm.ui.theme.NoteYellowDark
+import com.github.crisacm.ui.theme.RedLight
+import com.github.crisacm.ui.theme.RedMatte
+import com.github.crisacm.utils.AppLogger
 import just_notes_kmp.composeapp.generated.resources.Res
+import just_notes_kmp.composeapp.generated.resources.ic_check_box
+import just_notes_kmp.composeapp.generated.resources.ic_imagesmode
 import just_notes_kmp.composeapp.generated.resources.ic_info
-import just_notes_kmp.composeapp.generated.resources.ic_redo
-import just_notes_kmp.composeapp.generated.resources.ic_shoppingmode
-import just_notes_kmp.composeapp.generated.resources.ic_undo
+import just_notes_kmp.composeapp.generated.resources.ic_mic_google
+import just_notes_kmp.composeapp.generated.resources.ic_palette
+import just_notes_kmp.composeapp.generated.resources.ic_text_fields
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun EditNoteScreen(note: Note) {
-  val title = remember { mutableStateOf(note.title) }
-  val content = remember { mutableStateOf(note.content) }
-  val message = remember { mutableStateOf("") }
+fun EditNoteScreen(
+  id: Long,
+  state: EditNoteContracts.State,
+  effect: Flow<EditNoteContracts.Effect>?,
+  onEventSent: (event: EditNoteContracts.Event) -> Unit,
+  onNavigationRequested: (effect: EditNoteContracts.Effect.Navigation) -> Unit,
+) {
+  AppLogger.d("EditNoteScreen", "state: $state")
+
+  var noteTitle by remember { mutableStateOf("") }
+  var noteContent by remember { mutableStateOf(emptyList<NoteContent>()) }
+  var noteColor by remember { mutableStateOf(NoteWhite) }
+
+  var showSheetTags by remember { mutableStateOf(false) }
+  var showSheetInfo by remember { mutableStateOf(false) }
+  var showSheetColors by remember { mutableStateOf(false) }
+
+  var deleteDialogVisibility by remember { mutableStateOf(false) }
+  val snackbarHostState = remember { SnackbarHostState() }
+
+  LaunchedEffect(SIDE_EFFECTS_KEY) {
+    effect?.collect { effect ->
+      when (effect) {
+        is EditNoteContracts.Effect.Navigation.ToHome -> onNavigationRequested(effect)
+        is EditNoteContracts.Effect.ShowError -> snackbarHostState.showSnackbar(effect.message)
+      }
+    }
+  }
+
+  LaunchedEffect(Unit) {
+    if (state.note == null) {
+      onEventSent(EditNoteContracts.Event.LoadNoteInfo(id))
+    }
+  }
+
+  LaunchedEffect(state.note) {
+    noteTitle = state.note?.title ?: ""
+    noteColor =
+      when (state.note?.color) {
+        NoteColors.White -> NoteWhite
+        NoteColors.Yellow -> NoteYellow
+        NoteColors.YellowDark -> NoteYellowDark
+        NoteColors.Orange -> NoteOrange
+        NoteColors.Purple -> NotePurple
+        NoteColors.Green -> NoteGreen
+        NoteColors.Blue -> NoteBlue
+        else -> NoteWhite
+      }
+  }
+
+  LaunchedEffect(state.noteContent) {
+    noteContent = state.noteContent
+  }
 
   Scaffold(
     modifier = Modifier.fillMaxSize(),
+    snackbarHost = { SnackbarHost(snackbarHostState) },
     topBar = {
-      TopEditorBar(
-        onFinishClick = { },
-        undoEnable = false,
-        onUndoClick = { },
-        redoEnable = false,
-        onRedoClick = { },
-        onMenuClick = { },
+      if (!state.isLoading && state.note != null) {
+        TopEditorBar(
+          onFinishClick = { onEventSent(EditNoteContracts.Event.GoBack) },
+          undoEnable = false,
+          onUndoClick = { },
+          redoEnable = false,
+          onRedoClick = { },
+          onDeleteClick = { deleteDialogVisibility = true },
+        )
+      }
+    },
+    bottomBar = {
+      BottomEditorOptionsBar(
+        modifier = Modifier.imePadding(),
+        options =
+          listOf(
+            EditorOption(
+              desc = "Add Text Content",
+              icon = Res.drawable.ic_text_fields,
+              type = EditorOptionType.ADD_TEXT,
+            ),
+            EditorOption(
+              desc = "Add Image Content",
+              icon = Res.drawable.ic_imagesmode,
+              type = EditorOptionType.ADD_IMAGE,
+            ),
+            EditorOption(
+              desc = "Add Checklist Content",
+              icon = Res.drawable.ic_check_box,
+              type = EditorOptionType.ADD_CHECKLIST,
+            ),
+            EditorOption(
+              desc = "Add Audio Content",
+              icon = Res.drawable.ic_mic_google,
+              type = EditorOptionType.ADD_AUDIO,
+            ),
+          ),
+        onOptionClick = {
+          if (it.type == EditorOptionType.ADD_TEXT) {
+            onEventSent(EditNoteContracts.Event.AddContent(NoteContentType.TEXT))
+          }
+
+          if (it.type == EditorOptionType.ADD_IMAGE) {
+            onEventSent(EditNoteContracts.Event.AddContent(NoteContentType.IMAGE))
+          }
+
+          if (it.type == EditorOptionType.ADD_CHECKLIST) {
+            onEventSent(EditNoteContracts.Event.AddContent(NoteContentType.CHECKLIST))
+          }
+
+          if (it.type == EditorOptionType.ADD_AUDIO) {
+            onEventSent(EditNoteContracts.Event.AddContent(NoteContentType.AUDIO))
+          }
+        },
       )
     },
   ) { paddingValues ->
-    Box(
-      modifier =
-        Modifier
-          .fillMaxSize()
-          .background(GrayDarkBackground)
-          .padding(paddingValues),
-    ) {
-      Column(
+    if (!state.isLoading && state.error == null && state.note != null) {
+      Box(
         modifier =
           Modifier
             .fillMaxSize()
-            .background(color = GrayDarkBackground),
+            .background(GrayDarkBackground)
+            .padding(paddingValues),
       ) {
-        Row(
+        Column(
           modifier =
             Modifier
-              .fillMaxWidth()
-              .padding(start = 16.dp, end = 16.dp),
-          verticalAlignment = Alignment.CenterVertically,
+              .fillMaxSize()
+              .background(color = GrayDarkBackground),
         ) {
-          SelectTag(
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            SelectTag(
+              tag = state.noteTag,
+              onClick = { showSheetTags = true },
+            )
+            Spacer(Modifier.weight(1f))
+            Card(
+              modifier = Modifier,
+              shape = CircleShape,
+              border = BorderStroke(2.dp, GrayLightIcons),
+              colors = CardDefaults.cardColors(containerColor = noteColor),
+              content = { Box(modifier = Modifier.size(24.dp)) },
+            )
+            Card(
+              modifier = Modifier.padding(end = 12.dp),
+              shape = RoundedCornerShape(16.dp),
+              colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            ) {
+              IconButton(onClick = { showSheetColors = true }) {
+                Icon(
+                  modifier = Modifier.size(24.dp),
+                  painter = painterResource(Res.drawable.ic_palette),
+                  contentDescription = "Info Icon",
+                  tint = GrayLightIcons,
+                )
+              }
+            }
+            Card(
+              modifier = Modifier.padding(end = 24.dp),
+              shape = RoundedCornerShape(16.dp),
+              colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            ) {
+              IconButton(onClick = { showSheetInfo = true }) {
+                Icon(
+                  modifier = Modifier.size(24.dp),
+                  painter = painterResource(Res.drawable.ic_info),
+                  contentDescription = "Info Icon",
+                  tint = GrayLightIcons,
+                )
+              }
+            }
+          }
+          LazyColumn(
             modifier =
               Modifier
                 .weight(1f)
-                .padding(top = 6.dp, end = 16.dp, bottom = 6.dp),
-            onClick = {},
-          )
-          Box(
-            Modifier
-              .padding(top = 6.dp, bottom = 6.dp)
-              .clickable(onClick = {}),
+                .imePadding(),
           ) {
-            Icon(
-              modifier = Modifier.size(24.dp),
-              painter = painterResource(Res.drawable.ic_info),
-              contentDescription = "Info Icon",
-              tint = GrayLightIcons,
-            )
+            item {
+              NoteTitle(
+                modifier = Modifier.padding(horizontal = 12.dp),
+                value = noteTitle,
+                onValueChange = {
+                  noteTitle = it
+                  onEventSent(EditNoteContracts.Event.UpdateNote { copy(title = it) })
+                },
+              )
+            }
+
+            // Load here the content
+            if (noteContent.isEmpty()) {
+              item {
+                StateNoteContentEmpty()
+              }
+            } else {
+              items(noteContent, key = { item -> "${item.id}-${item.createdAt}" }) { item ->
+                Box(modifier = Modifier.fillMaxWidth()) {
+                  NoteBody(
+                    content = item,
+                    onValueChange = { content ->
+                      onEventSent(EditNoteContracts.Event.UpdateContent(content))
+                    },
+                    onRemoveContent = {
+                      onEventSent(EditNoteContracts.Event.RemoveContent(item))
+                    },
+                  )
+                }
+              }
+            }
           }
         }
-        LazyColumn(
-          modifier =
-            Modifier
-              .weight(1f)
-              .imePadding()
-              .padding(start = 16.dp, top = 16.dp, end = 16.dp),
-        ) {
-          item {
-            NoteTitle(
-              modifier = Modifier,
-              value = title.value,
-              onValueChange = { title.value = it },
-              onMenuClick = { },
-            )
-          }
-          item {
-            TextField(
-              modifier =
-                Modifier
-                  .fillMaxSize()
-                  .padding(top = 4.dp, bottom = 4.dp),
-              value = message.value,
-              onValueChange = { message.value = it },
-              placeholder = { Text("Tap here to enter a body") },
-              colors =
-                TextFieldDefaults.colors(
-                  focusedTextColor = Color.White,
-                  focusedContainerColor = Color.Transparent,
-                  unfocusedContainerColor = Color.Transparent,
-                  focusedIndicatorColor = Color.Transparent,
-                  unfocusedIndicatorColor = Color.Transparent,
-                ),
-            )
-          }
-        }
-        BottomEditorOptionsBar(
-          modifier = Modifier.imePadding(),
-          options = defaultEditorOptions,
-          onOptionClick = { },
+      }
+
+      if (deleteDialogVisibility) {
+        DeleteNoteDialog(
+          note = state.note,
+          onCancel = { deleteDialogVisibility = false },
+          onDelete = {
+            deleteDialogVisibility = false
+            onEventSent(EditNoteContracts.Event.DeleteNote(it))
+          },
         )
       }
+
+      SelectTagModalSheet(
+        visibility = showSheetTags,
+        onVisibilityChange = { showSheetTags = it },
+        tags = state.tags,
+        selectedTag = state.noteTag,
+        onSelectTag = { onEventSent(EditNoteContracts.Event.UpdateTag(it)) },
+        onCreateTag = { onEventSent(EditNoteContracts.Event.CreateTag(it)) },
+        onRemoveTag = { onEventSent(EditNoteContracts.Event.RemoveTag) },
+        onDeleteTag = { onEventSent(EditNoteContracts.Event.DeleteTag(it)) },
+      )
+
+      SelectColorsModalSheet(
+        visibility = showSheetColors,
+        onVisibilityChange = { showSheetColors = it },
+        note = state.note,
+        onColorSelect = { color ->
+          onEventSent(EditNoteContracts.Event.UpdateNote { copy(color = color) })
+        },
+      )
+
+      InfoModalSheet(
+        visibility = showSheetInfo,
+        onVisibilityChange = { showSheetInfo = it },
+        state.note,
+      )
+    }
+
+    if (state.isLoading && state.error == null) {
+      StateLoadingContent(Modifier.padding(paddingValues))
+    }
+
+    if (!state.isLoading && state.error != null) {
+      StateErrorContent(
+        modifier = Modifier.padding(paddingValues),
+        error = state.error,
+        onGoBack = { onEventSent(EditNoteContracts.Event.GoBack) },
+      )
     }
   }
 }
 
 @Composable
-fun SelectTag(
-  modifier: Modifier = Modifier,
-  onClick: () -> Unit,
-) {
-  Row(
-    modifier = modifier.clickable(onClick = onClick),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    Icon(
-      modifier = Modifier.size(18.dp),
-      painter = painterResource(Res.drawable.ic_shoppingmode),
-      contentDescription = "Tag Icon",
-      tint = GrayLightIcons,
-    )
-    Text(
-      modifier = Modifier.padding(start = 6.dp),
-      text = "Tag",
-      color = GrayLightIcons,
-    )
-    Icon(
-      imageVector = Icons.Default.ArrowDropDown,
-      contentDescription = "Select tag",
-      tint = GrayLightIcons,
-    )
-  }
-}
-
-@Composable
-fun BottomEditorOptionsBar(
-  modifier: Modifier = Modifier,
-  options: List<EditorOption>,
-  onOptionClick: (EditorOption) -> Unit,
-) {
-  LazyRow(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .padding(16.dp),
-  ) {
-    options.forEachIndexed { index, _ ->
-      item {
-        Card(
-          modifier = Modifier,
-          shape =
-            RoundedCornerShape(
-              topStart = if (index == 0) 25.dp else 0.dp,
-              bottomStart = if (index == 0) 25.dp else 0.dp,
-              topEnd = if (index == options.size - 1) 25.dp else 0.dp,
-              bottomEnd = if (index == options.size - 1) 25.dp else 0.dp,
-            ),
-          colors = CardDefaults.cardColors().copy(containerColor = GrayDarkBottomBarBackground),
-        ) {
-          IconButton(
-            modifier =
-              Modifier
-                .padding(
-                  start = if (index == 0) 6.dp else 0.dp,
-                  end = 6.dp,
-                ),
-            onClick = { onOptionClick(options[index]) },
-          ) {
-            Icon(
-              modifier = Modifier.size(24.dp),
-              painter = painterResource(options[index].icon),
-              contentDescription = options[index].desc,
-              tint = GrayLightIcons,
-            )
-          }
-        }
-      }
-    }
-  }
-}
-
-@Suppress("LongMethod", "LongParameterList")
-@Composable
-fun TopEditorBar(
-  modifier: Modifier = Modifier,
-  onFinishClick: () -> Unit,
-  undoEnable: Boolean,
-  onUndoClick: () -> Unit,
-  redoEnable: Boolean,
-  onRedoClick: () -> Unit,
-  onMenuClick: () -> Unit,
-) {
+fun StateNoteContentEmpty() {
   Card(
     modifier =
-      modifier
+      Modifier
         .fillMaxWidth()
-        .padding(16.dp)
-        .height(56.dp),
-    shape = RoundedCornerShape(24.dp),
-    colors = CardDefaults.cardColors().copy(containerColor = GrayDarkBottomBarBackground),
+        .padding(horizontal = 24.dp),
+    colors = CardDefaults.cardColors(containerColor = GrayDarkerBackground.copy(alpha = 0.3f)),
+    shape = RoundedCornerShape(16.dp),
   ) {
-    Row(
+    Text(
+      text = "Not are content",
       modifier =
         Modifier
-          .padding(start = 8.dp, end = 8.dp)
-          .height(56.dp)
-          .fillMaxWidth(),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Icon(
-        modifier =
-          Modifier
-            .padding(start = 16.dp, end = 16.dp)
-            .size(24.dp)
-            .clickable(onClick = onFinishClick),
-        imageVector = Icons.Default.Check,
-        contentDescription = null,
-        tint = GrayLightIcons,
-      )
-      Spacer(modifier = Modifier.weight(1f))
-      Icon(
-        painter = painterResource(Res.drawable.ic_undo),
-        modifier =
-          Modifier
-            .padding(start = 16.dp, end = 16.dp)
-            .size(24.dp)
-            .clickable(onClick = {
-              if (undoEnable) {
-                onUndoClick()
-              }
-            }),
-        contentDescription = null,
-        tint = if (undoEnable) GrayLightIcons else GrayLightIcons.copy(alpha = 0.5f),
-      )
-      Icon(
-        modifier =
-          Modifier
-            .padding(start = 16.dp, end = 16.dp)
-            .size(24.dp)
-            .clickable(onClick = {
-              if (redoEnable) {
-                onRedoClick()
-              }
-            }),
-        painter = painterResource(Res.drawable.ic_redo),
-        contentDescription = null,
-        tint = if (redoEnable) GrayLightIcons else GrayLightIcons.copy(alpha = 0.5f),
-      )
-      Spacer(modifier = Modifier.weight(1f))
-      Icon(
-        modifier =
-          Modifier
-            .padding(start = 16.dp, end = 16.dp)
-            .size(24.dp)
-            .clickable(onClick = onMenuClick),
-        imageVector = Icons.Default.MoreVert,
-        contentDescription = null,
-        tint = GrayLightIcons,
-      )
-    }
+          .fillMaxWidth()
+          .padding(12.dp),
+      textAlign = TextAlign.Center,
+      color = Color.White.copy(alpha = 0.7f),
+    )
   }
 }
 
-@Preview
 @Composable
-fun TopEditorBarPreview() {
-  TopEditorBar(
-    onFinishClick = { },
-    undoEnable = true,
-    onUndoClick = { },
-    redoEnable = false,
-    onRedoClick = { },
-    onMenuClick = { },
-  )
+fun StateLoadingContent(modifier: Modifier) {
+  Box(
+    modifier =
+      modifier
+        .fillMaxSize()
+        .background(GrayDarkBackground),
+    contentAlignment = Alignment.Center,
+  ) {
+    CircularProgressIndicator(
+      modifier = Modifier.size(24.dp),
+      strokeWidth = 1.dp,
+      color = Color.White,
+    )
+  }
 }
 
-@Preview
 @Composable
-fun BottomEditorOptionsBarPreview() {
-  BottomEditorOptionsBar(
-    options = defaultEditorOptions,
-    onOptionClick = {},
-  )
-}
-
-@Preview
-@Composable
-fun SelectTagPreview() {
-  SelectTag(onClick = {})
-}
-
-@Preview
-@Composable
-fun EditNoteScreenPreview() {
-  EditNoteScreen(
-    note =
-      Note(
-        title = "",
-        content =
-          listOf(
-            NoteContent(
-              content = "Note Content",
-            ),
-          ),
-      ),
-  )
+fun StateErrorContent(
+  modifier: Modifier,
+  error: String,
+  onGoBack: () -> Unit,
+) {
+  Column(
+    modifier =
+      modifier
+        .fillMaxSize()
+        .background(GrayDarkBackground),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center,
+  ) {
+    Icon(
+      Icons.Default.Info,
+      modifier = Modifier.size(48.dp),
+      contentDescription = "Info Icon",
+      tint = RedLight,
+    )
+    Text(
+      text = error,
+      modifier = Modifier.padding(16.dp),
+      color = Color.LightGray,
+      fontSize = 20.sp,
+      fontWeight = FontWeight.SemiBold,
+    )
+    Button(
+      onClick = { onGoBack() },
+      colors = ButtonDefaults.buttonColors(containerColor = RedMatte),
+    ) {
+      Text(text = "Go Back")
+    }
+  }
 }

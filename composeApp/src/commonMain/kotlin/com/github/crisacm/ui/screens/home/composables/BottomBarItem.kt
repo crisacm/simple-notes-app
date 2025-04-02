@@ -8,8 +8,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.github.crisacm.domain.model.BottomBarItemData
 import com.github.crisacm.ui.theme.GrayLightIcons
+import just_notes_kmp.composeapp.generated.resources.Res
+import just_notes_kmp.composeapp.generated.resources.ic_picture
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
@@ -28,3 +30,9 @@ fun BottomBarItem(
     )
   }
 }
+
+data class BottomBarItemData(
+  val drawableId: DrawableResource = Res.drawable.ic_picture,
+  val selected: Boolean = false,
+  val onClick: () -> Unit = {},
+)

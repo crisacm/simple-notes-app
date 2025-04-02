@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.github.crisacm.ui.theme.GrayDarkBackground
 import just_notes_kmp.composeapp.generated.resources.Res
 import just_notes_kmp.composeapp.generated.resources.ic_github
 import org.jetbrains.compose.resources.painterResource
@@ -50,10 +51,7 @@ fun CustomDialogUI(
     shape = RoundedCornerShape(10.dp),
     modifier = Modifier.padding(10.dp, 5.dp, 10.dp, 10.dp),
   ) {
-    Column(
-      modifier
-        .background(Color.White),
-    ) {
+    Column(modifier.background(GrayDarkBackground)) {
       Image(
         painterResource(Res.drawable.ic_github),
         contentDescription = "github icon",
@@ -97,14 +95,14 @@ fun CustomDialogUI(
         Modifier
           .fillMaxWidth()
           .padding(top = 10.dp)
-          .background(Color.White),
+          .background(GrayDarkBackground),
         horizontalArrangement = Arrangement.SpaceAround,
       ) {
         TextButton(onClick = { onLeftButtonClick() }) {
           Text(
             "Go to GitHub",
             fontWeight = FontWeight.Bold,
-            color = Color.Gray,
+            color = Color.LightGray,
             modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
           )
         }
@@ -112,7 +110,7 @@ fun CustomDialogUI(
           Text(
             "Dismiss",
             fontWeight = FontWeight.ExtraBold,
-            color = Color.Black,
+            color = Color.White,
             modifier = Modifier.padding(top = 5.dp, bottom = 5.dp),
           )
         }

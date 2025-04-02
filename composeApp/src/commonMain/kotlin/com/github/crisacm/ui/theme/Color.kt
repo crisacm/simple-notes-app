@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 val GrayLightIcons = Color(0xFF8E8C92)
 val GrayDarkBackground = Color(0xFF1C1B20)
+val GrayDarkerBackground = Color(0xFF0e0e10)
 val GrayDarkBottomBarBackground = Color(0xFF252429)
 val GrayDarkFabBackground = Color(0xFF252429)
 val GrayDarkFabBorder = Color(0xFF1C1B20)
@@ -17,3 +18,6 @@ val NoteOrange = Color(0xFFFBEBE3)
 val NotePurple = Color(0xFFEEE9FD)
 val NoteGreen = Color(0xFFECFEFE)
 val NoteBlue = Color(0xFFEBEEFD)
+
+val RedLight = Color(0xFFf1948a)
+val RedMatte = Color(0xFFcd6155)

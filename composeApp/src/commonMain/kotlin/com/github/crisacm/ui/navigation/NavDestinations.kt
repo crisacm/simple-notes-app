@@ -13,5 +13,5 @@ object Home
 
 @Serializable
 data class EditNote(
-  val noteId: String,
+  val noteId: Long,
 )

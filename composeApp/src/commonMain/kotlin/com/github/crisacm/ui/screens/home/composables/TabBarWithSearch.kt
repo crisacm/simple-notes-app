@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.github.crisacm.ui.screens.home.ListStyle
@@ -146,6 +147,7 @@ fun TopBarWithSearch(
             modifier = Modifier.size(24.dp),
             imageVector = Icons.Default.Person,
             contentDescription = null,
+            colorFilter = ColorFilter.tint(GrayLightIcons),
           )
         }
       }

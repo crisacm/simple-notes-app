@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Add
@@ -25,6 +26,8 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,10 +37,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.github.crisacm.domain.model.BottomBarItemData
-import com.github.crisacm.domain.model.fakeTagsList
+import com.github.crisacm.domain.model.Note
+import com.github.crisacm.domain.utils.NoteContentType
 import com.github.crisacm.ui.base.SIDE_EFFECTS_KEY
+import com.github.crisacm.ui.composable.DeleteNoteDialog
 import com.github.crisacm.ui.screens.home.composables.BottomBar
+import com.github.crisacm.ui.screens.home.composables.BottomBarItemData
 import com.github.crisacm.ui.screens.home.composables.CardNote
 import com.github.crisacm.ui.screens.home.composables.TagItem
 import com.github.crisacm.ui.screens.home.composables.TopBarWithSearch
@@ -63,12 +68,15 @@ fun HomeScreen(
   onEventSent: (HomeContracts.Event) -> Unit,
   navigateTo: (HomeContracts.Effect.Navigation) -> Unit,
 ) {
-  val tags = fakeTagsList
+  val tags = state.tags
 
   val searchText = remember { mutableStateOf("") }
   val listStyle = remember { mutableStateOf(ListStyle.GRID) }
   val selectedTags = remember { mutableStateOf(0) }
+
+  val snackbarHostState = remember { SnackbarHostState() }
   var openProfileDialog by remember { mutableStateOf(false) }
+  var deleteDialog by remember { mutableStateOf<Note?>(null) }
 
   LaunchedEffect(SIDE_EFFECTS_KEY) {
     effect
@@ -81,12 +89,21 @@ fun HomeScreen(
           is HomeContracts.Effect.Navigation.ToGitHub -> {
             navigateTo(effect)
           }
+
+          is HomeContracts.Effect.ShowError -> {
+            snackbarHostState.showSnackbar(effect.message)
+          }
         }
       }?.collect()
   }
 
+  LaunchedEffect(Unit) {
+    onEventSent(HomeContracts.Event.LoadNotes)
+  }
+
   Scaffold(
     modifier = Modifier.fillMaxSize(),
+    snackbarHost = { SnackbarHost(snackbarHostState) },
     topBar = {
       TopBarWithSearch(
         value = searchText.value,
@@ -112,17 +129,10 @@ fun HomeScreen(
             drawableId = drawableId,
             onClick = {
               when (index) {
-                0 -> { // Check
-                }
-
-                1 -> { // Text
-                }
-
-                2 -> { // Mic
-                }
-
-                3 -> { // Picture
-                }
+                0 -> onEventSent(HomeContracts.Event.CreateNote(NoteContentType.CHECKLIST))
+                1 -> onEventSent(HomeContracts.Event.CreateNote(NoteContentType.TEXT))
+                2 -> onEventSent(HomeContracts.Event.CreateNote(NoteContentType.AUDIO))
+                3 -> onEventSent(HomeContracts.Event.CreateNote(NoteContentType.IMAGE))
               }
             },
           )
@@ -136,7 +146,9 @@ fun HomeScreen(
     floatingActionButton = {
       LargeFloatingActionButton(
         modifier = Modifier.size(64.dp).offset(y = (48).dp),
-        onClick = { onEventSent(HomeContracts.Event.Edit("")) },
+        onClick = {
+          onEventSent(HomeContracts.Event.CreateNote(NoteContentType.TEXT))
+        },
         shape = CircleShape,
         containerColor = GrayDarkFabBackground,
         elevation = FloatingActionButtonDefaults.bottomAppBarFabElevation(defaultElevation = 6.dp),
@@ -192,11 +204,13 @@ fun HomeScreen(
           verticalItemSpacing = 10.dp,
           horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-          items(state.notes.size) { index ->
+          itemsIndexed(state.notes, key = { _, item -> "${item.first.id}-${item.first.createdAt}" }) { index, item ->
             CardNote(
               modifier = Modifier.padding(bottom = if (index == state.notes.size - 1) 16.dp else 0.dp),
-              note = state.notes[index],
-              onClick = { onEventSent(HomeContracts.Event.Edit(state.notes[index].id)) },
+              note = item.first,
+              contents = item.second,
+              onClick = { onEventSent(HomeContracts.Event.Edit(item.first.id!!)) },
+              onLongClick = { deleteDialog = item.first },
             )
           }
         }
@@ -207,6 +221,17 @@ fun HomeScreen(
       UserAccountDialog({
         onEventSent(HomeContracts.Event.GoToGithub)
       }, { openProfileDialog = false })
+    }
+
+    if (deleteDialog != null) {
+      DeleteNoteDialog(
+        note = deleteDialog!!,
+        onCancel = { deleteDialog = null },
+        onDelete = {
+          onEventSent(HomeContracts.Event.Delete(it))
+          deleteDialog = null
+        },
+      )
     }
   }
 }

@@ -1,28 +1,12 @@
 package com.github.crisacm.domain.model
 
-import androidx.compose.ui.graphics.Color
-import com.github.crisacm.ui.theme.NoteWhite
+import com.github.crisacm.domain.utils.NoteColors
 
 data class Note(
-  var id: String = "",
-  var title: String = "",
-  var content: List<NoteContent> = emptyList(),
-  var color: Color = NoteWhite,
-  var date: Long = 0,
-  var tags: List<String> = emptyList(),
+  var id: Long?,
+  var tagId: Long?,
+  var title: String,
+  var color: NoteColors,
+  var createdAt: Long,
+  var updatedAt: Long,
 )
-
-data class NoteContent(
-  var id: String = "",
-  var noteId: String = "",
-  var content: Any = Any(),
-  var checked: Boolean = false,
-  var type: NoteContentType = NoteContentType.TEXT,
-)
-
-enum class NoteContentType {
-  TEXT,
-  IMAGE,
-  AUDIO,
-  CHECKLIST,
-}

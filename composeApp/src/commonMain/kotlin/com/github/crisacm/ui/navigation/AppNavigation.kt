@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.github.crisacm.ui.navigation.destinations.EditNoteDestination
 import com.github.crisacm.ui.navigation.destinations.homeDestinationScreen
 import com.github.crisacm.utils.WebBrowser
@@ -52,7 +53,8 @@ fun AppNavigation(
     }
 
     composable<EditNote> {
-      EditNoteDestination(navController, "")
+      val args = it.toRoute<EditNote>()
+      EditNoteDestination(navController, args.noteId)
     }
   }
 }

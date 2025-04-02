@@ -1,5 +1,10 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.github.crisacm.ui.screens.home.composables
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -28,59 +33,101 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.crossfade
 import coil3.util.DebugLogger
 import com.github.crisacm.domain.model.Note
-import com.github.crisacm.domain.model.NoteContentType
-import com.github.crisacm.domain.model.fakeNotesList
+import com.github.crisacm.domain.model.NoteContent
+import com.github.crisacm.domain.utils.NoteColors
+import com.github.crisacm.domain.utils.NoteContentType
 import com.github.crisacm.ui.theme.GrayLightIcons
+import com.github.crisacm.ui.theme.NoteBlue
+import com.github.crisacm.ui.theme.NoteGreen
+import com.github.crisacm.ui.theme.NoteOrange
+import com.github.crisacm.ui.theme.NotePurple
+import com.github.crisacm.ui.theme.NoteWhite
+import com.github.crisacm.ui.theme.NoteYellow
 import com.github.crisacm.ui.theme.NoteYellowDark
 import just_notes_kmp.composeapp.generated.resources.Res
+import just_notes_kmp.composeapp.generated.resources.ic_add_photo
 import just_notes_kmp.composeapp.generated.resources.ic_check_box
 import just_notes_kmp.composeapp.generated.resources.ic_check_box_empty
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Suppress("MagicNumber", "LongMethod")
 @Composable
 fun CardNote(
   modifier: Modifier = Modifier,
   note: Note,
+  contents: List<NoteContent>,
   onClick: () -> Unit,
+  onLongClick: (() -> Unit)? = null,
 ) {
+  val noteColor =
+    when (note.color) {
+      NoteColors.White -> NoteWhite
+      NoteColors.Yellow -> NoteYellow
+      NoteColors.YellowDark -> NoteYellowDark
+      NoteColors.Orange -> NoteOrange
+      NoteColors.Purple -> NotePurple
+      NoteColors.Green -> NoteGreen
+      NoteColors.Blue -> NoteBlue
+    }
+
   Card(
-    modifier = modifier,
+    modifier =
+      modifier
+        .combinedClickable(
+          onClick = onClick,
+          onLongClick = onLongClick,
+        ),
     shape = RoundedCornerShape(26.dp),
-    colors = CardDefaults.cardColors().copy(containerColor = note.color),
-    onClick = onClick,
+    colors = CardDefaults.cardColors().copy(containerColor = noteColor),
   ) {
     Column(modifier = Modifier.padding(start = 16.dp, top = 20.dp, end = 16.dp, bottom = 20.dp)) {
-      val noteContainsImage = note.content.filter { it.type == NoteContentType.IMAGE }.isNotEmpty()
+      val noteContainsImage = contents.any { it.type == NoteContentType.IMAGE }
 
       if (noteContainsImage) {
-        val noteFirstImage: String = note.content.filter { it.type == NoteContentType.IMAGE }[0].content as String
+        val noteFirstImage: String = contents.filter { it.type == NoteContentType.IMAGE }[0].content
 
         Card(
           modifier = Modifier.fillMaxWidth().padding(top = 4.dp).height(120.dp),
           colors = CardDefaults.cardColors().copy(containerColor = NoteYellowDark),
         ) {
-          setSingletonImageLoaderFactory { context ->
-            ImageLoader
-              .Builder(context)
-              .crossfade(true)
-              .logger(DebugLogger())
-              .build()
-          }
+          if (noteFirstImage.isNotEmpty()) {
+            setSingletonImageLoaderFactory { context ->
+              ImageLoader
+                .Builder(context)
+                .crossfade(true)
+                .logger(DebugLogger())
+                .build()
+            }
 
-          AsyncImage(
-            model = noteFirstImage,
-            contentDescription = "Note image",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxWidth().aspectRatio(2 / 3f).clip(MaterialTheme.shapes.medium),
-          )
+            AsyncImage(
+              model = noteFirstImage,
+              contentDescription = "Note image",
+              contentScale = ContentScale.Crop,
+              modifier = Modifier.fillMaxWidth().aspectRatio(2 / 3f).clip(MaterialTheme.shapes.medium),
+            )
+          } else {
+            Box(
+              modifier = Modifier.fillMaxWidth().height(120.dp),
+              contentAlignment = Alignment.Center,
+            ) {
+              Icon(
+                painterResource(Res.drawable.ic_add_photo),
+                contentDescription = "add image icon",
+                modifier =
+                  Modifier
+                    .align(Alignment.Center)
+                    .padding(bottom = 8.dp)
+                    .size(24.dp),
+                tint = GrayLightIcons,
+              )
+            }
+          }
         }
       }
 
       Text(
         modifier = Modifier.padding(top = 8.dp),
-        text = note.title,
+        text = note.title.ifEmpty { "Note title" },
         fontWeight = FontWeight.Bold,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
@@ -88,9 +135,9 @@ fun CardNote(
         color = GrayLightIcons,
       )
 
-      val noteOnlyContainsChecklist = note.content.all { it.type == NoteContentType.CHECKLIST }
+      val noteOnlyContainsChecklist = contents.all { it.type == NoteContentType.CHECKLIST }
       if (!noteContainsImage && noteOnlyContainsChecklist) {
-        note.content
+        contents
           .filter { it.type == NoteContentType.CHECKLIST }
           .take(3)
           .forEachIndexed { index, content ->
@@ -99,7 +146,15 @@ fun CardNote(
             Card(
               modifier = Modifier.fillMaxWidth().padding(top = topPadding, bottom = 4.dp),
               shape = RoundedCornerShape(26.dp),
-              colors = CardDefaults.cardColors().copy(containerColor = NoteYellowDark),
+              colors =
+                CardDefaults.cardColors().copy(
+                  containerColor =
+                    noteColor.copy(
+                      red = noteColor.red * 0.9f,
+                      green = noteColor.green * 0.9f,
+                      blue = noteColor.blue * 0.9f,
+                    ),
+                ),
             ) {
               Row(
                 modifier = Modifier.padding(start = 18.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
@@ -110,10 +165,12 @@ fun CardNote(
                   painter = painterResource(icon),
                   contentDescription = null,
                   modifier = Modifier.size(16.dp),
+                  tint = GrayLightIcons,
                 )
                 Text(
                   modifier = Modifier.padding(start = 8.dp),
-                  text = content.content as String,
+                  text = content.content.ifEmpty { "Check value" },
+                  color = GrayLightIcons,
                   fontSize = 12.sp,
                   maxLines = 1,
                   overflow = TextOverflow.Ellipsis,
@@ -123,13 +180,13 @@ fun CardNote(
           }
       }
 
-      val noteContainText = note.content.any { it.type == NoteContentType.TEXT }
+      val noteContainText = contents.any { it.type == NoteContentType.TEXT }
       if (noteContainText) {
-        val noteFirstText: String = note.content.filter { it.type == NoteContentType.TEXT }[0].content as String
+        val noteFirstText: String = contents.filter { it.type == NoteContentType.TEXT }[0].content
 
         Text(
           modifier = Modifier.padding(top = 4.dp),
-          text = noteFirstText,
+          text = noteFirstText.ifEmpty { "Note content" },
           fontSize = 12.sp,
           overflow = TextOverflow.Ellipsis,
           lineHeight = 20.sp,
@@ -139,58 +196,4 @@ fun CardNote(
       }
     }
   }
-}
-
-@Preview
-@Composable
-fun CardNoteWhitePreview() {
-  CardNote(
-    note = fakeNotesList[0],
-    onClick = {},
-  )
-}
-
-@Preview
-@Composable
-fun CardNoteYellowPreview() {
-  CardNote(
-    note = fakeNotesList[1],
-    onClick = {},
-  )
-}
-
-@Preview
-@Composable
-fun CardNoteOrangePreview() {
-  CardNote(
-    note = fakeNotesList[2],
-    onClick = {},
-  )
-}
-
-@Preview
-@Composable
-fun CardNotePurplePreview() {
-  CardNote(
-    note = fakeNotesList[3],
-    onClick = {},
-  )
-}
-
-@Preview
-@Composable
-fun CardNoteGreenPreview() {
-  CardNote(
-    note = fakeNotesList[4],
-    onClick = {},
-  )
-}
-
-@Preview
-@Composable
-fun CardNoteBluePreview() {
-  CardNote(
-    note = fakeNotesList[5],
-    onClick = {},
-  )
 }
