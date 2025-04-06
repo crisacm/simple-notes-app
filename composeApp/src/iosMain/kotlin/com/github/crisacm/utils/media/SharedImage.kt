@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.get
 import kotlinx.cinterop.reinterpret
 import kotlinx.datetime.Clock
 import org.jetbrains.skia.Image

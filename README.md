@@ -8,15 +8,14 @@ They are just notes, aren't they? 🤔
 
 ## ✨ Features
 
-- [ ] Integrating session management with Firebase and [Session Manager](https://github.com/crisacm/android-session-manager)
-- [ ] Almacenar de manera local y remota las notas utilizando Room y Firebase Datastore respectivamente
-- [ ] Poder crear, editar y eliminar notas sincronizadas entre diferentes dispositivos
+- [x] Implementar Kotlin Multi Platform para así ejecutar la app en Android e iOS.
+- [x] Almacenar de manera local las notas.
+- [x] Poder crear, editar y eliminar notas.
 
 ## 🚀 Technologies
 
-- Jetpack: Compose, Room, Hilt, etc..
-- Firebase: Authentication, Firestore.
-- Material UI 3.0
-- Ktor
-- Coil
+- Jetpack:
+  - Compose Multiplatform
+  - Room
 - Koin
+- Coil
